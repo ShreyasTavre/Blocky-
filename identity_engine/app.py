@@ -77,8 +77,8 @@ def build_rich_persona(domain=None, seed=None):
     safe_domain_tag = domain.replace('.', '_').replace(':', '') if domain else "web"
     sanitized_first = "".join(c for c in first_name.lower() if c.isalnum())
     sanitized_last = "".join(c for c in last_name.lower() if c.isalnum())
-    decoy_email = f"{sanitized_first}.{sanitized_last}.{random.randint(10, 99)}@shieldmail.dev"
-    username = f"{sanitized_first}_{sanitized_last}{random.randint(10, 99)}"
+    decoy_email = f"{sanitized_first}.{sanitized_last}.{local_fake.random_int(10, 99)}@shieldmail.dev"
+    username = f"{sanitized_first}_{sanitized_last}{local_fake.random_int(10, 99)}"
 
     return {
         "name": full_name,

@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  identity-engine:
+    build:
+      context: ./identity_engine
+      dockerfile: Dockerfile
+    container_name: identity_shield_engine
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - PINATA_JWT=${PINATA_JWT:-}
+      - PINATA_API_KEY=${PINATA_API_KEY:-}
+      - PINATA_API_SECRET=${PINATA_API_SECRET:-}
+    restart: unless-stopped

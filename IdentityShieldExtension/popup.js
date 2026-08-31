@@ -265,6 +265,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     chrome.runtime.sendMessage({ action: "TOGGLE_CANVAS_DEFENSE", active });
   });
 
+  // Open Full Screen Analytics Dashboard
+  const openDashboardBtn = document.getElementById('open-dashboard-btn');
+  if (openDashboardBtn) {
+    openDashboardBtn.addEventListener('click', () => {
+      chrome.tabs.create({ url: chrome.runtime.getURL('dashboard.html') });
+    });
+  }
+
   // Initial Radar check
   refreshRadarView();
 

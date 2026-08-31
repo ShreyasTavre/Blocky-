@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Identity Shield - Threat Radar & Telemetry Analytics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="dashboard-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="logo-shield">🛡️</span>
+        <div class="brand-text">
+          <span class="logo-title">IDENTITY <span class="accent">SHIELD</span></span>
+          <span class="logo-subtitle">Telemetry Intelligence</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <a href="#overview" class="nav-item active">
+          <span class="nav-icon">📊</span>
+          <span>Threat Overview</span>
+        </a>
+        <a href="#domains" class="nav-item">
+          <span class="nav-icon">🌐</span>
+          <span>Domain Matrix</span>
+        </a>
+        <a href="#telemetry" class="nav-item">
+          <span class="nav-icon">📜</span>
+          <span>Live Logs</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="protection-status">
+          <span class="pulse-dot"></span>
+          <div class="status-info">
+            <span class="status-label">Deception Engine</span>
+            <span class="status-value">Active & Shielding</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <header class="top-bar">
+        <div class="page-title">
+          <h1>Privacy Intelligence & Deception Telemetry</h1>
+          <p>Real-time telemetry of intercepted surveillance vectors and domain-isolated shadow identities.</p>
+        </div>
+        <div class="top-actions">
+          <button id="refresh-btn" class="action-btn">
+            <span class="btn-icon">🔄</span>
+            <span>Refresh Telemetry</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Key KPI Metrics Row -->
+      <section class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">Trackers Neutralized</span>
+            <span class="metric-icon">🛡️</span>
+          </div>
+          <div class="metric-body">
+            <span class="metric-value" id="kpi-trackers">0</span>
+            <span class="metric-trend positive">↑ Live Protected</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">Isolated Domain Personas</span>
+            <span class="metric-icon">🌐</span>
+          </div>
+          <div class="metric-body">
+            <span class="metric-value" id="kpi-domains">0</span>
+            <span class="metric-trend neutral">Per-Domain Seeded</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">Web Forms Spoofed</span>
+            <span class="metric-icon">⚡</span>
+          </div>
+          <div class="metric-body">
+            <span class="metric-value" id="kpi-autofills">0</span>
+            <span class="metric-trend positive">Synthetic Injections</span>
+          </div>
+        </div>
+
+        <div class="metric-card highlight">
+          <div class="metric-header">
+            <span class="metric-title">Privacy Entropy Score</span>
+            <span class="metric-icon">🎯</span>
+          </div>
+          <div class="metric-body">
+            <span class="metric-value" id="kpi-entropy">98.4%</span>
+            <span class="metric-trend positive">Grade A+ Anti-Profiling</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Analytics Charts Row -->
+      <section class="charts-grid">
+        <!-- Chart 1: Surveillance Activity Timeline -->
+        <div class="chart-card large">
+          <div class="card-header">
+            <div class="header-titles">
+              <h3>Surveillance Neutralization Timeline</h3>
+              <span class="card-subtitle">Volume of intercepted tracking and fingerprinting requests across domains</span>
+            </div>
+            <div class="chart-legend">
+              <span class="legend-item"><span class="legend-dot cyan"></span> Intercepted Trackers</span>
+              <span class="legend-item"><span class="legend-dot purple"></span> Form Deceptions</span>
+            </div>
+          </div>
+          <div class="chart-canvas-container">
+            <svg id="timeline-chart" class="svg-chart" viewBox="0 0 700 220" preserveAspectRatio="none">
+              <!-- Grid Lines -->
+              <line x1="40" y1="30" x2="680" y2="30" stroke="rgba(255,255,255,0.06)" />
+              <line x1="40" y1="80" x2="680" y2="80" stroke="rgba(255,255,255,0.06)" />
+              <line x1="40" y1="130" x2="680" y2="130" stroke="rgba(255,255,255,0.06)" />
+              <line x1="40" y1="180" x2="680" y2="180" stroke="rgba(255,255,255,0.06)" />
+
+              <!-- Timeline Area and Path (Rendered dynamically via JS) -->
+              <defs>
+                <linearGradient id="cyan-grad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.35" />
+                  <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.0" />
+                </linearGradient>
+              </defs>
+              <polygon id="chart-area" points="40,180 140,140 240,160 340,100 440,70 540,90 640,40 640,180 40,180" fill="url(#cyan-grad)" />
+              <polyline id="chart-line" points="40,180 140,140 240,160 340,100 440,70 540,90 640,40" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <div class="chart-x-labels">
+              <span>Mon</span>
+              <span>Tue</span>
+              <span>Wed</span>
+              <span>Thu</span>
+              <span>Fri</span>
+              <span>Sat</span>
+              <span>Today (Live)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart 2: Surveillance Vector Breakdown -->
+        <div class="chart-card">
+          <div class="card-header">
+            <div class="header-titles">
+              <h3>Threat Vectors</h3>
+              <span class="card-subtitle">Classification of neutralized scripts</span>
+            </div>
+          </div>
+          <div class="donut-chart-container">
+            <div class="donut-wrapper">
+              <svg class="donut-svg" viewBox="0 0 100 100">
+                <circle class="donut-bg" cx="50" cy="50" r="40" stroke-width="12"></circle>
+                <!-- Segment 1: Ad Profiling (40%) -->
+                <circle class="donut-segment seg-1" cx="50" cy="50" r="40" stroke-dasharray="100 151" stroke-dashoffset="25"></circle>
+                <!-- Segment 2: Analytics (35%) -->
+                <circle class="donut-segment seg-2" cx="50" cy="50" r="40" stroke-dasharray="88 163" stroke-dashoffset="-75"></circle>
+                <!-- Segment 3: Session Recording (25%) -->
+                <circle class="donut-segment seg-3" cx="50" cy="50" r="40" stroke-dasharray="63 188" stroke-dashoffset="-163"></circle>
+              </svg>
+              <div class="donut-center-text">
+                <span class="center-count" id="donut-total">100%</span>
+                <span class="center-label">Coverage</span>
+              </div>
+            </div>
+
+            <div class="donut-legend">
+              <div class="legend-row">
+                <span class="legend-color-box rose"></span>
+                <span class="legend-name">Ad Profiling (Meta / TikTok)</span>
+                <span class="legend-val" id="pct-ad">40%</span>
+              </div>
+              <div class="legend-row">
+                <span class="legend-color-box indigo"></span>
+                <span class="legend-name">Telemetry (GA4 / Mixpanel)</span>
+                <span class="legend-val" id="pct-analytics">35%</span>
+              </div>
+              <div class="legend-row">
+                <span class="legend-color-box amber"></span>
+                <span class="legend-name">Session Recorders (Hotjar)</span>
+                <span class="legend-val" id="pct-session">25%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Domain Matrix Table -->
+      <section class="table-section" id="domains">
+        <div class="card table-card">
+          <div class="card-header">
+            <div class="header-titles">
+              <h3>Domain Isolation Matrix</h3>
+              <span class="card-subtitle">Active shadow personas mapped to isolated web origins</span>
+            </div>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Target Domain</th>
+                  <th>Assigned Shadow Persona</th>
+                  <th>Decoy Email</th>
+                  <th>Profession & Company</th>
+                  <th>Hardware Shield</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="domains-table-body">
+                <tr>
+                  <td colspan="6" class="loading-cell">Loading isolated domain matrix...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Live Event Telemetry Stream -->
+      <section class="telemetry-section" id="telemetry">
+        <div class="card terminal-card">
+          <div class="terminal-header">
+            <div class="terminal-dots">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+            </div>
+            <span class="terminal-title">live_deception_telemetry.log — Real-Time Surveillance Defense Stream</span>
+            <span class="badge green">● Streaming</span>
+          </div>
+          <div class="terminal-body" id="terminal-stream">
+            <div class="log-line">[SYSTEM] Initializing Identity Shield Telemetry Engine v1.2...</div>
+            <div class="log-line">[SYSTEM] WebCrypto Zero-Knowledge Engine Active.</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

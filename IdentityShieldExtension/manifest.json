@@ -1,16 +1,31 @@
 {
   "manifest_version": 3,
   "name": "Identity Shield",
-  "version": "1.0",
-  "description": "Pings the Identity Engine API on every new website.",
+  "version": "1.2",
+  "description": "Decentralized Browser Deception & Anti-Profiling Shadow Identity Engine.",
   "permissions": [
-    "tabs"
+    "tabs",
+    "storage",
+    "activeTab",
+    "scripting"
   ],
   "host_permissions": [
     "http://127.0.0.1:5000/*",
-    "http://localhost:5000/*"
+    "http://localhost:5000/*",
+    "<all_urls>"
   ],
   "background": {
     "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Identity Shield Control Panel"
   }
-}
+}

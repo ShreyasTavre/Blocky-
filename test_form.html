@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Identity Shield - Form Autofill Test Playground</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #111827;
+      --accent: #00f0ff;
+      --accent-purple: #8b5cf6;
+      --border: rgba(255, 255, 255, 0.1);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+      background-image: 
+        radial-gradient(circle at 20% 20%, rgba(0, 240, 255, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 40%);
+    }
+
+    .container {
+      max-width: 650px;
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .header {
+      margin-bottom: 28px;
+      text-align: center;
+    }
+
+    .header .badge {
+      display: inline-block;
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      color: var(--accent);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    .header h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .instructions {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px dashed rgba(0, 240, 255, 0.3);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .instructions strong {
+      color: var(--accent);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group.full-width {
+      grid-column: span 2;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, select {
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #ffffff;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    .btn-row {
+      grid-column: span 2;
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .submit-btn {
+      flex: 1;
+      background: linear-gradient(135deg, #00f0ff 0%, #3b82f6 100%);
+      color: #000000;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: filter 0.2s ease;
+    }
+
+    .submit-btn:hover {
+      filter: brightness(1.1);
+    }
+
+    .clear-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 12px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .clear-btn:hover {
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+
+    #submission-output {
+      margin-top: 20px;
+      background: #080c14;
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 8px;
+      padding: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--accent);
+      white-space: pre-wrap;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <span class="badge">TEST ENVIRONMENT</span>
+      <h1>Web Form Autofill Playground</h1>
+      <p>Simulating a real sign-up / checkout form with tracking scripts.</p>
+    </div>
+
+    <div class="instructions">
+      💡 <strong>How to Test:</strong> Click the <strong>Identity Shield</strong> extension icon in your browser toolbar, then click <strong>"⚡ Autofill Current Page"</strong>. Notice all fields instantly fill with your active shadow persona!
+    </div>
+
+    <form id="signup-form" class="form-grid" onsubmit="handleSubmit(event)">
+      <div class="form-group">
+        <label for="first-name">First Name</label>
+        <input type="text" id="first-name" name="first_name" placeholder="John" autocomplete="given-name">
+      </div>
+
+      <div class="form-group">
+        <label for="last-name">Last Name</label>
+        <input type="text" id="last-name" name="last_name" placeholder="Doe" autocomplete="family-name">
+      </div>
+
+      <div class="form-group full-width">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" placeholder="john.doe@example.com" autocomplete="email">
+      </div>
+
+      <div class="form-group">
+        <label for="username">Username / Handle</label>
+        <input type="text" id="username" name="username" placeholder="johndoe99" autocomplete="username">
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Phone Number</label>
+        <input type="tel" id="phone" name="phone" placeholder="+1 (555) 000-0000" autocomplete="tel">
+      </div>
+
+      <div class="form-group">
+        <label for="job-title">Job Title / Role</label>
+        <input type="text" id="job-title" name="job_title" placeholder="Lead Architect">
+      </div>
+
+      <div class="form-group">
+        <label for="company">Company / Organization</label>
+        <input type="text" id="company" name="company" placeholder="Acme Corp">
+      </div>
+
+      <div class="form-group full-width">
+        <label for="address">Street Address</label>
+        <input type="text" id="address" name="street_address" placeholder="123 Main St" autocomplete="street-address">
+      </div>
+
+      <div class="form-group">
+        <label for="city">City</label>
+        <input type="text" id="city" name="city" placeholder="New York">
+      </div>
+
+      <div class="form-group">
+        <label for="zipcode">Postal / Zip Code</label>
+        <input type="text" id="zipcode" name="postal_code" placeholder="10001">
+      </div>
+
+      <div class="btn-row">
+        <button type="submit" class="submit-btn">Simulate Form Submission</button>
+        <button type="button" class="clear-btn" onclick="document.getElementById('signup-form').reset(); document.getElementById('submission-output').style.display='none';">Clear</button>
+      </div>
+    </form>
+
+    <div id="submission-output"></div>
+  </div>
+
+  <script>
+    function handleSubmit(e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData.entries());
+      const output = document.getElementById('submission-output');
+      output.style.display = 'block';
+      output.textContent = "🛡️ Submitted Payload to Simulated Tracker:\n" + JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>

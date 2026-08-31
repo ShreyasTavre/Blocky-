@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Identity Shield</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <span class="logo-shield">🛡️</span>
+        <span class="logo-text">IDENTITY <span class="accent">SHIELD</span></span>
+      </div>
+      <div class="domain-chip" id="domain-chip" title="Current Website Scope">
+        <span class="pulse-dot"></span>
+        <span id="active-domain-label">Detecting...</span>
+      </div>
+    </header>
+
+    <!-- Top Action Bar -->
+    <section class="action-banner">
+      <button id="autofill-btn" class="primary-action-btn">
+        <span class="btn-icon">⚡</span>
+        <span class="btn-label">Autofill Current Page</span>
+      </button>
+      <button id="regenerate-btn" class="icon-btn" title="Generate New Persona for this Domain">
+        <span>🎲</span>
+      </button>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-tab="persona-view">👤 Shadow Persona</button>
+      <button class="tab-btn" data-tab="vault-view">🔒 Zero-Knowledge Vault</button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="app-content">
+      <!-- TAB 1: Shadow Persona View -->
+      <section class="tab-panel active" id="persona-view">
+        <div class="card persona-card">
+          <div class="card-header">
+            <div class="title-group">
+              <h3>Active Shadow Identity</h3>
+              <span class="badge" id="persona-scope-badge">Per-Domain</span>
+            </div>
+          </div>
+
+          <div class="persona-grid">
+            <div class="detail-item full-width">
+              <span class="label">Full Name</span>
+              <div class="value-copy-row">
+                <span class="value highlight" id="fake-name">Loading...</span>
+                <button class="copy-btn" data-copy="fake-name" title="Copy Name">📋</button>
+              </div>
+            </div>
+
+            <div class="detail-item full-width">
+              <span class="label">Decoy Email</span>
+              <div class="value-copy-row">
+                <span class="value mono" id="fake-email">Loading...</span>
+                <button class="copy-btn" data-copy="fake-email" title="Copy Email">📋</button>
+              </div>
+            </div>
+
+            <div class="detail-item">
+              <span class="label">Username</span>
+              <div class="value-copy-row">
+                <span class="value mono" id="fake-username">-</span>
+                <button class="copy-btn" data-copy="fake-username" title="Copy Username">📋</button>
+              </div>
+            </div>
+
+            <div class="detail-item">
+              <span class="label">Phone</span>
+              <div class="value-copy-row">
+                <span class="value" id="fake-phone">-</span>
+                <button class="copy-btn" data-copy="fake-phone" title="Copy Phone">📋</button>
+              </div>
+            </div>
+
+            <div class="detail-item">
+              <span class="label">Job Title</span>
+              <span class="value" id="fake-job">-</span>
+            </div>
+
+            <div class="detail-item">
+              <span class="label">Company</span>
+              <span class="value" id="fake-company">-</span>
+            </div>
+
+            <div class="detail-item full-width">
+              <span class="label">Decoy Location</span>
+              <span class="value" id="fake-location">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="autofill-status" class="status-banner hidden"></div>
+      </section>
+
+      <!-- TAB 2: Zero-Knowledge Decentralized Vault -->
+      <section class="tab-panel" id="vault-view">
+        <div class="card vault-card">
+          <div class="vault-info">
+            <h3>Client-Side Encrypted Vault</h3>
+            <p class="section-desc">Encrypt real PII with <strong>AES-256-GCM</strong> in your browser before decentralizing to IPFS. Only your passphrase can decrypt it.</p>
+          </div>
+
+          <div class="form-inputs">
+            <div class="input-group">
+              <label for="real-name">Real Name</label>
+              <input type="text" id="real-name" placeholder="e.g. Satoshi Nakamoto">
+            </div>
+            <div class="input-group">
+              <label for="real-email">Real Email</label>
+              <input type="email" id="real-email" placeholder="e.g. satoshi@gmx.com">
+            </div>
+            <div class="input-group">
+              <label for="real-job">Real Profession</label>
+              <input type="text" id="real-job" placeholder="e.g. Cryptographer">
+            </div>
+            <div class="input-group">
+              <label for="master-passphrase">Master Passphrase (Zero-Knowledge Key)</label>
+              <input type="password" id="master-passphrase" placeholder="Enter secure passphrase to encrypt">
+            </div>
+
+            <button id="vault-btn" class="glow-btn">
+              <span class="btn-text">🔐 ENCRYPT & PIN TO IPFS</span>
+              <div class="spinner hidden" id="btn-spinner"></div>
+            </button>
+          </div>
+
+          <!-- Cryptographic Proof Details -->
+          <div class="crypto-proof-box hidden" id="crypto-proof-box">
+            <div class="proof-header">
+              <span>📦 IPFS Decentralized Vault (CID)</span>
+              <span class="status-pill green">Pinned</span>
+            </div>
+            <p class="proof-mono-text" id="ipfs-cid-display">-</p>
+            <a href="#" target="_blank" class="proof-link" id="ipfs-link">View Encrypted Ciphertext on IPFS ↗</a>
+
+            <div class="proof-header" style="margin-top: 10px;">
+              <span>⛓️ Cryptographic SHA-256 State Proof</span>
+              <span class="status-pill purple">Verified</span>
+            </div>
+            <p class="proof-mono-text" id="sha256-proof-display">-</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <span>🛡️ Identity Shield v1.2 • Zero-Knowledge Deception</span>
+    </footer>
+  </div>
+
+  <script src="crypto.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -6,7 +6,7 @@
   <title>Identity Shield</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
@@ -36,8 +36,9 @@
 
     <!-- Navigation Tabs -->
     <nav class="nav-tabs">
-      <button class="tab-btn active" data-tab="persona-view">👤 Shadow Persona</button>
-      <button class="tab-btn" data-tab="vault-view">🔒 Zero-Knowledge Vault</button>
+      <button class="tab-btn active" data-tab="persona-view">👤 Persona</button>
+      <button class="tab-btn" data-tab="radar-view">📡 Radar <span class="tab-badge hidden" id="radar-badge">0</span></button>
+      <button class="tab-btn" data-tab="vault-view">🔒 Vault</button>
     </nav>
 
     <!-- Main Content -->
@@ -48,8 +49,8 @@
           <div class="card-header">
             <div class="title-group">
               <h3>Active Shadow Identity</h3>
-              <span class="badge" id="persona-scope-badge">Per-Domain</span>
             </div>
+            <span class="badge" id="persona-scope-badge">Per-Domain</span>
           </div>
 
           <div class="persona-grid">
@@ -105,7 +106,49 @@
         <div id="autofill-status" class="status-banner hidden"></div>
       </section>
 
-      <!-- TAB 2: Zero-Knowledge Decentralized Vault -->
+      <!-- TAB 2: Live Privacy Radar & Threat Telemetry -->
+      <section class="tab-panel" id="radar-view">
+        <div class="card radar-card">
+          <div class="card-header">
+            <h3>Active Site Threat Radar</h3>
+            <span class="badge" id="tracker-count-badge">0 Trackers</span>
+          </div>
+
+          <!-- Detected Trackers Feed -->
+          <div class="trackers-list" id="trackers-list">
+            <div class="empty-state">
+              <span class="empty-icon">🛡️</span>
+              <p>No active telemetry trackers detected on this domain.</p>
+            </div>
+          </div>
+
+          <!-- Anti-Fingerprint Defense Cloak Toggle -->
+          <div class="defense-toggle-row">
+            <div class="toggle-info">
+              <span class="toggle-title">Canvas Fingerprint Cloak</span>
+              <span class="toggle-subtitle">Injects micro-noise to alter device hashes</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="canvas-cloak-toggle" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- Global Protection Stats -->
+          <div class="stats-overview">
+            <div class="stat-box">
+              <span class="stat-number" id="stat-trackers">0</span>
+              <span class="stat-label">Trackers Intercepted</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-number" id="stat-autofills">0</span>
+              <span class="stat-label">Forms Spoofed</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: Zero-Knowledge Decentralized Vault -->
       <section class="tab-panel" id="vault-view">
         <div class="card vault-card">
           <div class="vault-info">

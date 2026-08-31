@@ -1,12 +1,60 @@
 /**
  * Identity Shield - Content Script
- * Handles intelligent in-page form detection and Shadow Persona autofilling.
+ * 1. Intelligent Form Detection & Shadow Persona Autofilling
+ * 2. In-Page Canvas Fingerprint Noise Defense Cloak
  */
 
 (function () {
-  console.log("[IdentityShield] Content script initialized on:", window.location.hostname);
+  // -------------------------------------------------------------
+  // Part 1: In-Page Canvas Fingerprint Defense Cloak
+  // -------------------------------------------------------------
+  function injectCanvasDefense() {
+    const script = document.createElement('script');
+    script.textContent = `(${function () {
+      // Check if already injected
+      if (window.__IDENTITY_SHIELD_CANVAS_DEFENSE__) return;
+      window.__IDENTITY_SHIELD_CANVAS_DEFENSE__ = true;
 
-  // Heuristic matching rules for form fields
+      const shiftValue = Math.floor(Math.random() * 2) + 1; // 1 or 2 pixel shift
+
+      // Hook CanvasRenderingContext2D.prototype.getImageData
+      const origGetImageData = CanvasRenderingContext2D.prototype.getImageData;
+      CanvasRenderingContext2D.prototype.getImageData = function (x, y, w, h) {
+        const imageData = origGetImageData.apply(this, arguments);
+        const data = imageData.data;
+        // Inject subtle micro-noise into a small fraction of pixels
+        for (let i = 0; i < data.length; i += 32) {
+          data[i] = (data[i] + shiftValue) % 256;
+        }
+        return imageData;
+      };
+
+      // Hook HTMLCanvasElement.prototype.toDataURL
+      const origToDataURL = HTMLCanvasElement.prototype.toDataURL;
+      HTMLCanvasElement.prototype.toDataURL = function () {
+        try {
+          const ctx = this.getContext('2d');
+          if (ctx && this.width > 0 && this.height > 0) {
+            const imgData = ctx.getImageData(0, 0, Math.min(this.width, 16), Math.min(this.height, 16));
+            ctx.putImageData(imgData, 0, 0);
+          }
+        } catch (e) {}
+        return origToDataURL.apply(this, arguments);
+      };
+
+      console.log("[IdentityShield] 🛡️ Canvas Fingerprint Defense active on page.");
+    }})();`;
+
+    (document.head || document.documentElement).appendChild(script);
+    script.remove();
+  }
+
+  // Inject early
+  injectCanvasDefense();
+
+  // -------------------------------------------------------------
+  // Part 2: Form Autofill Engine
+  // -------------------------------------------------------------
   function getFieldType(input) {
     const name = (input.name || "").toLowerCase();
     const id = (input.id || "").toLowerCase();
@@ -15,7 +63,6 @@
     const ariaLabel = (input.getAttribute("aria-label") || "").toLowerCase();
     const type = (input.type || "").toLowerCase();
 
-    // Check associated label text if exists
     let labelText = "";
     if (input.labels && input.labels.length > 0) {
       labelText = Array.from(input.labels).map(l => l.innerText).join(" ").toLowerCase();
@@ -69,7 +116,6 @@
     return null;
   }
 
-  // Safely fills input and triggers modern reactive framework events (React, Vue, Angular)
   function setNativeValue(element, value) {
     const valueSetter = Object.getOwnPropertyDescriptor(element, 'value') ?
       Object.getOwnPropertyDescriptor(element, 'value').set :
@@ -86,24 +132,18 @@
     element.dispatchEvent(new Event('blur', { bubbles: true }));
   }
 
-  // Visual pulse animation on filled fields
   function flashElement(el) {
     const origTransition = el.style.transition;
-    const origBoxShadow = el.style.boxShadow;
-    const origBorderColor = el.style.borderColor;
-
-    el.style.transition = "all 0.3s ease";
-    el.style.boxShadow = "0 0 10px rgba(0, 240, 255, 0.8)";
-    el.style.borderColor = "#00f0ff";
+    const origOutline = el.style.outline;
+    el.style.transition = "outline 0.2s ease";
+    el.style.outline = "2px solid #6366f1";
 
     setTimeout(() => {
-      el.style.boxShadow = origBoxShadow;
-      el.style.borderColor = origBorderColor;
+      el.style.outline = origOutline;
       el.style.transition = origTransition;
-    }, 1500);
+    }, 1200);
   }
 
-  // Autofill all detected form fields on the page
   function autofillPage(persona) {
     if (!persona) return { success: false, count: 0 };
 
@@ -119,11 +159,9 @@
       }
     });
 
-    console.log(`[IdentityShield] Successfully autofilled ${filledCount} fields with shadow persona.`);
     return { success: true, count: filledCount };
   }
 
-  // Listen for messages from popup or background worker
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "AUTOFILL_SHADOW_IDENTITY") {
       const result = autofillPage(request.persona);
@@ -133,5 +171,4 @@
     }
     return true;
   });
-
 })();

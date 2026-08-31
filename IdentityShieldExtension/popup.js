@@ -1,6 +1,6 @@
 /**
  * Identity Shield - Popup UI Logic
- * Coordinates domain detection, in-page autofill, and Zero-Knowledge Vaulting.
+ * Coordinates domain detection, form autofilling, live tracker radar, and Zero-Knowledge Vaulting.
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -10,9 +10,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const regenerateBtn = document.getElementById('regenerate-btn');
   const autofillStatus = document.getElementById('autofill-status');
 
-  // Elements - Tabs
+  // Elements - Tabs & Badges
   const tabButtons = document.querySelectorAll('.tab-btn');
   const tabPanels = document.querySelectorAll('.tab-panel');
+  const radarBadge = document.getElementById('radar-badge');
 
   // Elements - Persona Fields
   const fakeName = document.getElementById('fake-name');
@@ -22,6 +23,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   const fakeJob = document.getElementById('fake-job');
   const fakeCompany = document.getElementById('fake-company');
   const fakeLocation = document.getElementById('fake-location');
+
+  // Elements - Radar & Threats
+  const trackerCountBadge = document.getElementById('tracker-count-badge');
+  const trackersList = document.getElementById('trackers-list');
+  const canvasCloakToggle = document.getElementById('canvas-cloak-toggle');
+  const statTrackers = document.getElementById('stat-trackers');
+  const statAutofills = document.getElementById('stat-autofills');
 
   // Elements - Vault
   const realNameInput = document.getElementById('real-name');
@@ -45,7 +53,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       tabButtons.forEach(b => b.classList.remove('active'));
       tabPanels.forEach(p => p.classList.remove('active'));
       btn.classList.add('active');
-      document.getElementById(btn.dataset.tab).classList.add('active');
+      const panelId = btn.dataset.tab;
+      const targetPanel = document.getElementById(panelId);
+      if (targetPanel) targetPanel.classList.add('active');
+
+      if (panelId === 'radar-view') {
+        refreshRadarView();
+      }
     });
   });
 
@@ -77,7 +91,6 @@ document.addEventListener('DOMContentLoaded', async () => {
           currentPersona = response.persona;
           renderPersona(currentPersona);
         } else {
-          // Fallback direct generation
           generateDirectFallback();
         }
       }
@@ -115,10 +128,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderPersona(currentPersona);
   }
 
-  // Load initial persona
   loadDomainPersona(false);
 
-  // 4. Regenerate Persona for Current Domain
+  // 4. Regenerate Persona
   regenerateBtn.addEventListener('click', () => {
     loadDomainPersona(true);
     showStatus("🎲 Generated fresh persona for " + currentDomain, "info");
@@ -137,7 +149,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         { action: "AUTOFILL_SHADOW_IDENTITY", persona: currentPersona },
         (res) => {
           if (chrome.runtime.lastError) {
-            // Try injecting content script dynamically if not yet ready
             chrome.scripting.executeScript({
               target: { tabId: activeTabId },
               files: ["content.js"]
@@ -145,9 +156,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               chrome.tabs.sendMessage(
                 activeTabId,
                 { action: "AUTOFILL_SHADOW_IDENTITY", persona: currentPersona },
-                (retryRes) => {
-                  handleAutofillResult(retryRes);
-                }
+                (retryRes) => handleAutofillResult(retryRes)
               );
             });
           } else {
@@ -164,6 +173,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (res && res.success) {
       if (res.count > 0) {
         showStatus(`🛡️ Injected shadow identity into ${res.count} field${res.count > 1 ? 's' : ''}!`, "success");
+        chrome.runtime.sendMessage({ action: "INCREMENT_STAT", statName: "autofillsCount" }, (r) => {
+          if (r && r.stats) statAutofills.textContent = r.stats.autofillsCount;
+        });
       } else {
         showStatus("⚠️ No compatible form fields detected on page.", "warning");
       }
@@ -196,7 +208,67 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // 7. Zero-Knowledge Client-Side Encryption Vault
+  // 7. Privacy Radar & Threat Telemetry View
+  function refreshRadarView() {
+    if (!activeTabId) return;
+
+    chrome.runtime.sendMessage({ action: "GET_TAB_TRACKERS", tabId: activeTabId }, (res) => {
+      if (res && res.success) {
+        const trackers = res.trackers || [];
+        const count = trackers.length;
+
+        // Update badges
+        if (count > 0) {
+          radarBadge.textContent = count;
+          radarBadge.classList.remove('hidden');
+          trackerCountBadge.textContent = `${count} Intercepted`;
+          trackerCountBadge.style.color = "#38bdf8";
+          trackerCountBadge.style.borderColor = "rgba(56, 189, 248, 0.3)";
+        } else {
+          radarBadge.classList.add('hidden');
+          trackerCountBadge.textContent = "0 Detected";
+          trackerCountBadge.style.color = "#34d399";
+          trackerCountBadge.style.borderColor = "rgba(16, 185, 129, 0.3)";
+        }
+
+        // Render List
+        if (count === 0) {
+          trackersList.innerHTML = `
+            <div class="empty-state">
+              <span class="empty-icon">🛡️</span>
+              <p>No active trackers detected on this domain.</p>
+            </div>
+          `;
+        } else {
+          trackersList.innerHTML = trackers.map(t => `
+            <div class="tracker-item">
+              <div class="tracker-left">
+                <span class="tracker-name">${t.name}</span>
+                <span class="tracker-category">${t.category}</span>
+              </div>
+              <span class="tracker-status-tag">🛡️ Intercepted</span>
+            </div>
+          `).join('');
+        }
+
+        // Update Toggle & Global Stats
+        canvasCloakToggle.checked = res.canvasDefenseActive;
+        statTrackers.textContent = res.globalStats.trackersDetected || 0;
+        statAutofills.textContent = res.globalStats.autofillsCount || 0;
+      }
+    });
+  }
+
+  // Toggle Canvas Defense Cloak
+  canvasCloakToggle.addEventListener('change', (e) => {
+    const active = e.target.checked;
+    chrome.runtime.sendMessage({ action: "TOGGLE_CANVAS_DEFENSE", active });
+  });
+
+  // Initial Radar check
+  refreshRadarView();
+
+  // 8. Zero-Knowledge Client-Side Encryption Vault
   vaultBtn.addEventListener('click', async () => {
     const realName = realNameInput.value.trim();
     const realEmail = realEmailInput.value.trim();
@@ -217,7 +289,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     btnSpinner.classList.remove('hidden');
 
     try {
-      // Step A: Client-Side WebCrypto AES-256-GCM Encryption
       const rawIdentityPayload = {
         real_name: realName,
         real_email: realEmail,
@@ -226,16 +297,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       };
 
       const encryptedBundle = await window.CryptoEngine.encrypt(rawIdentityPayload, passphrase);
-      console.log("[IdentityShield] Encrypted Ciphertext Bundle:", encryptedBundle);
 
-      // Step B: Send ONLY the encrypted bundle to the backend / IPFS
       const response = await fetch('http://127.0.0.1:5000/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           encrypted_bundle: encryptedBundle,
           proof_hash: encryptedBundle.proofHash,
-          real_name: `[Encrypted] ${realName.split(' ')[0]}*` // Masked label for logging
+          real_name: `[Encrypted] ${realName.split(' ')[0]}*`
         })
       });
 
@@ -247,15 +316,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       const ipfsHash = data.ipfs_cid || "QmDecentralizedVaultMockCID" + encryptedBundle.proofHash.substring(2, 14);
       const ipfsUrl = data.ipfs_url || `https://ipfs.io/ipfs/${ipfsHash}`;
 
-      // Step C: Render Cryptographic Proofs
       ipfsCidDisplay.textContent = ipfsHash;
       ipfsLink.href = ipfsUrl;
       sha256ProofDisplay.textContent = encryptedBundle.proofHash;
       cryptoProofBox.classList.remove('hidden');
 
+      chrome.runtime.sendMessage({ action: "INCREMENT_STAT", statName: "vaultsCount" });
+
     } catch (err) {
       console.error("[IdentityShield] Vaulting failed:", err);
-      // Even if offline/local, demonstrate client-side encryption output
       const rawIdentityPayload = { real_name: realName, real_email: realEmail, real_job: realJob };
       const encryptedBundle = await window.CryptoEngine.encrypt(rawIdentityPayload, passphrase);
       const fallbackCid = "QmShield" + encryptedBundle.proofHash.substring(2, 20);
